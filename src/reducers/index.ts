@@ -20,6 +20,8 @@ const noop = () => _.identity;
 
 function main(state = initial, action: Action) {
 
+  console.log(action.type, action);
+
   let reducer = reducers[action.type] || noop;
   return reducer(action)(state);
 };

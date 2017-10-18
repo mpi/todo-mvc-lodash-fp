@@ -627,6 +627,14 @@ declare namespace fp {
 
     isMatchWith(customizer: Function): (specification: any) => (object: any) => boolean;
 
+    /**
+     * Returns a new list containing only those items that match a given predicate function. The
+     * predicate function is passed one argument: (value).
+     */
+    reject<T>(fn: (value: T) => boolean): (list: T[]) => T[];
+    reject<T>(fn: (value: T) => boolean, list: T[]): T[];
+    reject(predicate: string): (collection: string) => string[];
+    reject<W extends {}, T>(predicate: W): (collection: List<T>) => T[];
   }
 }
 

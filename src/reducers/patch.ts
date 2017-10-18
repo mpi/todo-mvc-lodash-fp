@@ -9,9 +9,13 @@ function customizer(this: any, val: any, op: any) {
   }
 }
 
+interface Predicate {
+  (arg: any): boolean;
+}
+
 interface Function {
-  onlyIf: (condFn: Function) => Function;
-  otherwise: (condFn: Function) => Function;
+  onlyIf<X extends Function>(this: X, condFn: Predicate): X;
+  otherwise<X extends Function>(this: X, defaultFn: any): X;
 }
 
 Function.prototype['onlyIf'] = function (condFn: Function) {
@@ -25,7 +29,19 @@ Function.prototype['otherwise'] = function (defaultFn: Function) {
 
 // general-purpose, higher-order functions:
 
-export const patch = (recipe: any) => _.mergeWith(customizer, _, recipe);
+interface Transform<X> {
+  (arg: X): X;
+}
+
+type Recipe<S> = {
+  [K in keyof S]?: S[K] | Transform<S[K]>;
+}
+
+interface Patch<S> extends Function {
+  (state: S): S
+}
+
+export function patch<S>(recipe: Recipe<S>): Patch<S> { return _.mergeWith(customizer, _, recipe)};
 export const matches = _.isMatchWith(customizer);
 // export const matches = _.isMatchWith(customizer);
 // let forAll = _.map;
