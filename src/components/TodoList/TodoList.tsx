@@ -7,7 +7,7 @@ import * as all from '../../actions';
 import './TodoList.css';
 import { bindActionCreators } from 'redux';
 
-function TodoList({ text, items, actions }: any) {
+function TodoList({ text, items, filter, actions }: any) {
 
   let input: HTMLInputElement;
 
@@ -20,6 +20,17 @@ function TodoList({ text, items, actions }: any) {
   function countCompleted() {
     return _.sumBy(items, (x: {completed: boolean}) => x.completed ? 0 : 1);
   }
+
+  function isFilteredBy(value: string){
+    return filter === value ? 'selected' : '';
+  }
+
+  const filterBy = ({completed}: any) =>
+    filter === 'COMPLETED' ? completed :
+    filter === 'ACTIVE' ? !completed :
+    true;
+
+
 
   return (
     <div>
@@ -35,15 +46,15 @@ function TodoList({ text, items, actions }: any) {
           <input className="toggle-all" type="checkbox"/>
           <label>Mark all as complete</label>
           <ul className="todo-list">
-            {items.map((i: any) => <TodoItem {...i} actions={actions} />)}
+            {items.filter(filterBy).map((i: any) => <TodoItem {...i} actions={actions} />)}
           </ul>
         </section>
         <footer className="footer">
           <span className="todo-count"><strong>{countCompleted()}</strong> items left</span>
           <ul className="filters">
-            <li><a className="selected">All</a></li>
-            <li><a>Active</a></li>
-            <li><a>Completed</a></li>
+            <li><a className={isFilteredBy('ALL')} onClick={() => actions.switchFilter('ALL')}>All</a></li>
+            <li><a className={isFilteredBy('ACTIVE')} onClick={() => actions.switchFilter('ACTIVE')}>Active</a></li>
+            <li><a className={isFilteredBy('COMPLETED')} onClick={() => actions.switchFilter('COMPLETED')}>Completed</a></li>
           </ul>
           <button className="clear-completed" onClick={actions.clearCompleted}>Clear completed</button>
         </footer>

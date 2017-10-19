@@ -1,13 +1,15 @@
 import * as _ from 'lodash/fp';
 import { Reducer, Action } from 'redux';
 import * as all from './reducers';
+import { State } from '../state';
 
-const initial = {
+const initial: State = {
   items: [
     { title: 'Learn React', completed: true },
     { title: 'Build pet project', completed: false }
   ],
-  text: ''
+  text: '',
+  filter: 'ALL'
 };
 
 interface Reducers {

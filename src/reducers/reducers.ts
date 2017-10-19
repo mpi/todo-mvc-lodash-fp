@@ -1,7 +1,9 @@
 import * as _ from 'lodash/fp';
 import { patch, matches } from './patch';
 
-type ConcatFn = {
+import { AddItemReducer } from './reducers.h';
+
+interface ConcatFn {
   <T>(t: T): (t:T[]) => T[];
 }
 
@@ -26,21 +28,6 @@ const append: ConcatFn = _.concat;
 
 // reducers:
 
-interface Reducer<S, A> {
-  (action: A): (state: S) => S;
-}
-
-interface State {
-  items: { title: string, completed: boolean}[];
-  text: string;
-}
-
-interface AddAction {
-  title: string;
-}
-
-type AddItemReducer = Reducer<State, AddAction>;
-
 export const addItem: AddItemReducer = ({ title }) => patch({
   items: append({ title, completed: false }),
   text: ''
@@ -64,6 +51,10 @@ export const clearCompleted = () => patch({
 
 export const changeText = ({ text }: any) => patch({
   text: text
+});
+
+export const switchFilter = ({ filter }: any) => patch({
+  filter
 });
 
 export const toggleEditMode = ({ title }: any) => patch({
