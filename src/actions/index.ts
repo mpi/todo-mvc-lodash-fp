@@ -1,49 +1,64 @@
-import { AnyAction, Action } from 'redux';
+import { type, returnOf, ActionType } from '../types';
 
-type A = Action & AnyAction;
-
-export function toggleItem(title: string): A {
-  return {
-    type: type('TOGGLE_ITEM'), title
-  };
+export function toggleItem(title: string) {
+  return { title, ...type('TOGGLE_ITEM') };
 }
 
 export function addItem(title: string) {
   return { title, ...type('ADD_ITEM') };
 }
 
-export function changeText(text: string): A {
+export function changeText(text: string) {
   return { text, ...type('CHANGE_TEXT') };
 }
 
-export function changeTitle(text: string, title: string): A {
-  return {
-    type: 'CHANGE_TITLE', text, title
-  };
+export function changeTitle(text: string, title: string) {
+  return { text, title, ...type('CHANGE_TITLE') };
 }
 
-export function clearCompleted(): A {
-  return {
-    type: 'CLEAR_COMPLETED'
-  };
+export function clearCompleted() {
+  return { ...type('CLEAR_COMPLETED') };
 }
 
-export function toggleEditMode(title: string): A {
-  return {
-    type: 'TOGGLE_EDIT_MODE', title
-  };
+export function toggleEditMode(title: string) {
+  return { title, ...type('TOGGLE_EDIT_MODE') };
 }
 
-export function switchFilter(filter: string): A {
-  return {
-    type: 'SWITCH_FILTER', filter
-  };
+export function switchFilter(filter: 'ALL' | 'COMPLETED' | 'ACTIVE'): SwitchFilterAction {
+  return { filter, ...type('SWITCH_FILTER') };
 }
 
-function type<X extends string>(t: X): Type<X> {
-  return new Type<X>(t);
+export const ToggleItemAction = returnOf(toggleItem);
+export type ToggleItemAction = typeof ToggleItemAction;
+
+export const AddItemAction = returnOf(addItem);
+export type AddItemAction = typeof AddItemAction;
+
+export const ChangeTextAction = returnOf(changeText);
+export type ChangeTextAction = typeof ChangeTextAction;
+
+export const ChangeTitleAction = returnOf(changeTitle);
+export type ChangeTitleAction = typeof ChangeTitleAction;
+
+export const ClearCompletedAction = returnOf(clearCompleted);
+export type ClearCompletedAction = typeof ClearCompletedAction;
+
+export const ToggleEditModeAction = returnOf(toggleEditMode);
+export type ToggleEditModeAction = typeof ToggleEditModeAction;
+
+// export const SwitchFilterAction = returnOf(switchFilter);
+// export type SwitchFilterAction = typeof SwitchFilterAction;
+
+// alternatively:
+export interface SwitchFilterAction extends ActionType<'SWITCH_FILTER'> {
+  filter: string;
 }
 
-class Type<T>  {
-  constructor(public readonly type: T){};
-}
+export type Action =
+  | AddItemAction
+  | ToggleItemAction
+  | ChangeTextAction
+  | ChangeTitleAction
+  | ClearCompletedAction
+  | ToggleEditModeAction
+  | SwitchFilterAction;

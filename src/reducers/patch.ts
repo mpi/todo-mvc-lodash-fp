@@ -29,21 +29,14 @@ Function.prototype['otherwise'] = function (defaultFn: Function) {
 
 // general-purpose, higher-order functions:
 
-interface Transform<X> {
-  (arg: X): X;
-}
-
-type Recipe<S> = {
-  [K in keyof S]?: S[K] | Transform<S[K]>;
-}
-
-interface Patch<S> extends Function {
+interface Transform<S> {
   (state: S): S
 }
 
-export function patch<S>(recipe: Recipe<S>): Patch<S> { return _.mergeWith(customizer, _, recipe)};
-export const matches = _.isMatchWith(customizer);
-// export const matches = _.isMatchWith(customizer);
-// let forAll = _.map;
-// let removeIf = _.reject;
-// let toggle = _.negate(_.identity);
+export interface Patch<S> extends Transform<S>, Function {}
+
+type Diff<S> = {
+  [F in keyof S]?: S[F] | Transform<S[F]>;
+}
+
+export function patch<S, T extends S>(changes: Diff<S>): Patch<T> { return _.mergeWith(customizer, _, changes)};

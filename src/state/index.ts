@@ -15,3 +15,12 @@ interface TodoItem {
 }
 
 export type State = TodoListApp;
+
+export const initial: State = {
+  items: [
+    { title: 'Learn React', completed: true },
+    { title: 'Build pet project', completed: false }
+  ],
+  text: '',
+  filter: 'ALL'
+};
