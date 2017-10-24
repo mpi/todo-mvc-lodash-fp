@@ -9,9 +9,10 @@ interface TodoListApp {
 
 type TodoList = TodoItem[];
 
-interface TodoItem {
+export interface TodoItem {
   title: string;
   completed: boolean;
+  editMode?: boolean;
 }
 
 export type State = TodoListApp;

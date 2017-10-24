@@ -32,3 +32,13 @@ export function reducerFor<S, A extends ActionType<string>>(reducers: Reducers<S
     return (reducers[action.type] || noop)(action);
   }
 }
+
+interface Ref<T> {
+  (ref: T | null): T;
+  ref: T;
+}
+
+export function refTo<T extends HTMLElement>(type: { prototype: T }) {
+  let fn: any = (ref?: T | null) => (fn.ref = ref ? ref : fn.ref);
+  return fn as Ref<T>;
+}

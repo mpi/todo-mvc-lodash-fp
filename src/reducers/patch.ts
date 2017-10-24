@@ -33,7 +33,9 @@ interface Transform<S> {
   (state: S): S
 }
 
-export interface Patch<S> extends Transform<S>, Function {}
+export interface Patch<S> extends Function {
+  (state: Partial<S>): S
+}
 
 type Diff<S> = {
   [F in keyof S]?: S[F] | Transform<S[F]>;

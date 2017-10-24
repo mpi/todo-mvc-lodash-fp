@@ -10,8 +10,8 @@ function customizer(this: any, val: any, op: any) {
 }
 
 export const nothing = _.identity;
-export const forAll = _.map;
+export function forAll<T, U extends T>(fn: (t: T) => U): (list: T[]) => U[] { return _.map<T, U>(fn) };
 export const removeIf = _.reject;
 export const append = _.concat;
-export const negate = _.negate(_.identity);
+export const negate = _.negate((v: boolean) => v);
 export const matches = _.isMatchWith(customizer);

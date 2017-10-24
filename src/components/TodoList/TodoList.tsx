@@ -1,62 +1,68 @@
 import * as _ from 'lodash';
+import { KeyboardEvent, ChangeEvent } from 'react';
 import * as React from 'react';
-import {KeyboardEvent} from 'react';
-import { connect, Dispatch } from 'react-redux';
+import { connect } from 'react-redux';
+
 import * as all from '../../actions';
+import { State, TodoItem } from '../../state';
+import { refTo } from '../../types';
 
-import './TodoList.css';
-import { bindActionCreators } from 'redux';
+type Actions = typeof all;
 
-function TodoList({ text, items, filter, actions }: any) {
+function TodoList(props: State & Actions) {
 
-  let input: HTMLInputElement;
+  let { text, items, filter } = props;
+  let { addItem, changeText, switchFilter, clearCompleted } = props;
 
-  let addOnEnter = (ev: KeyboardEvent<HTMLInputElement>) => {
-    if(ev.key === 'Enter'){
-      actions.addItem(input.value);
+  let input = refTo(HTMLInputElement);
+
+  const addOnEnter = (ev: KeyboardEvent<HTMLInputElement>) => {
+    if (ev.key === 'Enter') {
+      addItem(input.ref.value);
     }
   };
 
-  function countCompleted() {
-    return _.sumBy(items, (x: {completed: boolean}) => x.completed ? 0 : 1);
-  }
-
-  function isFilteredBy(value: string){
-    return filter === value ? 'selected' : '';
-  }
-
-  const filterBy = ({completed}: any) =>
+  const countCompleted = () => _.sumBy(items, x => x.completed ? 0 : 1);
+  const isFilteredBy = (value: string) => filter === value ? 'selected' : '';
+  const filterBy = ({ completed }: TodoItem) =>
     filter === 'COMPLETED' ? completed :
-    filter === 'ACTIVE' ? !completed :
-    true;
-
-
+      filter === 'ACTIVE' ? !completed :
+        true;
 
   return (
     <div>
       <section className="todoapp">
         <header className="header">
           <h1>todos</h1>
-          <input ref={n => n ? input = n : null} type="text" value={text} className="new-todo"
-            onChange={() => actions.changeText(input.value)}
+          <input
+            ref={input}
+            type="text"
+            value={text}
+            className="new-todo"
+            onChange={() => changeText(input.ref.value)}
             onKeyPress={addOnEnter}
-            placeholder="What needs to be done?"/>
+            placeholder="What needs to be done?"
+          />
         </header>
         <section className="main">
-          <input className="toggle-all" type="checkbox"/>
+          <input className="toggle-all" type="checkbox" />
           <label>Mark all as complete</label>
           <ul className="todo-list">
-            {items.filter(filterBy).map((i: any) => <TodoItem {...i} actions={actions} />)}
+            {items.filter(filterBy).map(
+              (item, i) =>
+                <TodoItem key={i} {...item} {...props} />
+            )
+            }
           </ul>
         </section>
         <footer className="footer">
           <span className="todo-count"><strong>{countCompleted()}</strong> items left</span>
           <ul className="filters">
-            <li><a className={isFilteredBy('ALL')} onClick={() => actions.switchFilter('ALL')}>All</a></li>
-            <li><a className={isFilteredBy('ACTIVE')} onClick={() => actions.switchFilter('ACTIVE')}>Active</a></li>
-            <li><a className={isFilteredBy('COMPLETED')} onClick={() => actions.switchFilter('COMPLETED')}>Completed</a></li>
+            <li><a className={isFilteredBy('ALL')} onClick={() => switchFilter('ALL')}>All</a></li>
+            <li><a className={isFilteredBy('ACTIVE')} onClick={() => switchFilter('ACTIVE')}>Active</a></li>
+            <li><a className={isFilteredBy('COMPLETED')} onClick={() => switchFilter('COMPLETED')}>Completed</a></li>
           </ul>
-          <button className="clear-completed" onClick={actions.clearCompleted}>Clear completed</button>
+          <button className="clear-completed" onClick={clearCompleted}>Clear completed</button>
         </footer>
       </section>
       <footer className="info">
@@ -68,24 +74,33 @@ function TodoList({ text, items, filter, actions }: any) {
   );
 }
 
-function TodoItem({ title, completed, editMode, actions }: any) {
-  return (
-    !editMode ?
-    <li className={completed ? 'completed' : 'todo'} onDoubleClick={() => actions.toggleEditMode(title)}>
-      <input onChange={() => actions.toggleItem(title)} checked={completed} className="toggle" type='checkbox'/>
-      <label>{title}</label>
-    </li>
-    :
-    <li className="editing" onDoubleClick={() => actions.toggleEditMode(title)}>
-        <input onChange={($ev) => actions.changeTitle($ev.target.value, title)} autoFocus={true} onBlur={() => actions.toggleEditMode(title)} className="edit" type='text' value={title} />
-    </li>
-  );
+function TodoItem({ title, completed, editMode, toggleEditMode, toggleItem, changeTitle }: TodoItem & Actions) {
+
+  const onCheckboxChange = () => toggleItem(title);
+  const onItemDoubleClick = () => toggleEditMode(title);
+  const onBlur = () => toggleEditMode(title);
+  const onInputChange = ({ target }: ChangeEvent<HTMLInputElement>) => changeTitle(target.value, title);
+
+  return editMode ? edit() : preview();
+
+  function preview() {
+    return (
+      <li className={completed ? 'completed' : 'todo'} onDoubleClick={onItemDoubleClick}>
+        <input onChange={onCheckboxChange} checked={completed} className="toggle" type="checkbox" />
+        <label>{title}</label>
+      </li>
+    );
+  }
+
+  function edit() {
+    return (
+      <li className="editing" onDoubleClick={onItemDoubleClick}>
+        <input onChange={onInputChange} autoFocus={true} onBlur={onBlur} className="edit" type="text" value={title} />
+      </li>
+    );
+  }
 }
 
-const actions = (dispatch: Dispatch<any>) => ({
-  actions: bindActionCreators(all as any, dispatch)
-});
-
-const connector = connect(_.identity, actions);
+const connector = connect<State & Actions>(_.identity, all);
 
 export default connector(TodoList);

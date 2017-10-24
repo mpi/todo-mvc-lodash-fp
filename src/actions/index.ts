@@ -51,7 +51,7 @@ export type ToggleEditModeAction = typeof ToggleEditModeAction;
 
 // alternatively:
 export interface SwitchFilterAction extends ActionType<'SWITCH_FILTER'> {
-  filter: string;
+  filter: 'ALL' | 'COMPLETED' | 'ACTIVE';
 }
 
 export type Action =

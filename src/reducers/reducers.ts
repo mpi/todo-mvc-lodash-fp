@@ -1,6 +1,7 @@
 import { State } from '../state';
 import { Reducer, reducerFor } from '../types';
-import { AddItemAction, ChangeTitleAction, ToggleItemAction, ClearCompletedAction, ChangeTextAction, SwitchFilterAction, ToggleEditModeAction, Action } from '../actions';
+import { AddItemAction, ChangeTitleAction, ToggleItemAction, ClearCompletedAction,
+  ChangeTextAction, SwitchFilterAction, ToggleEditModeAction, Action } from '../actions';
 
 import { patch } from './patch';
 import { append, forAll, removeIf, nothing, matches, negate } from './utils';
