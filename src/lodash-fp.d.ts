@@ -608,8 +608,8 @@ declare namespace fp {
     isEmpty(value?: any): boolean;
 
     // custom:
-    isFunction(value?: any): boolean;
-    isRegExp(value?: any): boolean;
+    isFunction(value?: any): value is Function;
+    isRegExp(value?: any): value is RegExp;
     isUndefined(value?: any): boolean;
 
     mergeWith(customizer: Function, source: any, target: any): any;
@@ -620,7 +620,7 @@ declare namespace fp {
     toUpper(text: string): string;
 
     identity: <T>(val: T) => T;
-    negate: <F extends Function>(fn: F) => F;
+    negate: <T>(fn: (a: T) => T) => (a: T) => T;
 
     concat<T>(value: T, collection: T | T[]): T[];
     concat<T>(value: T): (collection: T | T[]) => T[];

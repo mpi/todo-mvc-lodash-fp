@@ -3,8 +3,7 @@ import { Reducer, reducerFor } from '../types';
 import { AddItemAction, ChangeTitleAction, ToggleItemAction, ClearCompletedAction,
   ChangeTextAction, SwitchFilterAction, ToggleEditModeAction, Action } from '../actions';
 
-import { patch } from './patch';
-import { append, forAll, removeIf, nothing, matches, negate } from './utils';
+import { patch, append, forAll, removeIf, nothing, matches, negate } from './patch';
 
 // helpers:
 
