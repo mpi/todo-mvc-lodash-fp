@@ -1,30 +1,29 @@
 import * as _ from 'lodash';
-import { KeyboardEvent, ChangeEvent } from 'react';
 import * as React from 'react';
 import { connect } from 'react-redux';
 
-import * as all from '../../actions';
-import { State, TodoItem } from '../../state';
 import { refTo } from '../../types';
+
+import * as all from '../../actions';
+import { State } from '../../state';
 
 type Actions = typeof all;
 
-function TodoList(props: State & Actions) {
+function TodoList({text, items, filter, ...actions}: State & Actions) {
 
-  let { text, items, filter } = props;
-  let { addItem, changeText, switchFilter, clearCompleted } = props;
+  let { addItem, changeText, switchFilter, clearCompleted } = actions;
 
   let input = refTo(HTMLInputElement);
 
-  const addOnEnter = (ev: KeyboardEvent<HTMLInputElement>) => {
+  const addOnEnter = (ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === 'Enter') {
-      addItem(input.ref.value);
+      addItem(input.ref!.value);
     }
   };
 
   const countCompleted = () => _.sumBy(items, x => x.completed ? 0 : 1);
   const isFilteredBy = (value: string) => filter === value ? 'selected' : '';
-  const filterBy = ({ completed }: TodoItem) =>
+  const filterBy = ({ completed }: State.TodoItem) =>
     filter === 'COMPLETED' ? completed :
       filter === 'ACTIVE' ? !completed :
         true;
@@ -37,9 +36,9 @@ function TodoList(props: State & Actions) {
           <input
             ref={input}
             type="text"
-            value={text}
+
             className="new-todo"
-            onChange={() => changeText(input.ref.value)}
+            onChange={() => changeText(input.ref!.value)}
             onKeyPress={addOnEnter}
             placeholder="What needs to be done?"
           />
@@ -50,7 +49,7 @@ function TodoList(props: State & Actions) {
           <ul className="todo-list">
             {items.filter(filterBy).map(
               (item, i) =>
-                <TodoItem key={i} {...item} {...props} />
+                <TodoItem key={i} {...item} {...actions} />
             )
             }
           </ul>
@@ -74,12 +73,12 @@ function TodoList(props: State & Actions) {
   );
 }
 
-function TodoItem({ title, completed, editMode, toggleEditMode, toggleItem, changeTitle }: TodoItem & Actions) {
+function TodoItem({ title, completed, editMode, toggleEditMode, toggleItem, changeTitle}: State.TodoItem & Actions) {
 
   const onCheckboxChange = () => toggleItem(title);
   const onItemDoubleClick = () => toggleEditMode(title);
   const onBlur = () => toggleEditMode(title);
-  const onInputChange = ({ target }: ChangeEvent<HTMLInputElement>) => changeTitle(target.value, title);
+  const onInputChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => changeTitle(target.value, title);
 
   return editMode ? edit() : preview();
 
@@ -102,5 +101,4 @@ function TodoItem({ title, completed, editMode, toggleEditMode, toggleItem, chan
 }
 
 const connector = connect<State & Actions>(_.identity, all);
-
 export default connector(TodoList);

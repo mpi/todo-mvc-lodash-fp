@@ -1,21 +1,25 @@
 
-type DisplayMode = 'ALL' | 'COMPLETED' | 'ACTIVE';
+export namespace State {
 
-interface TodoListApp {
-  text: string;
-  items: TodoList;
-  filter: DisplayMode;
+  type DisplayMode = 'ALL' | 'COMPLETED' | 'ACTIVE';
+
+  export interface TodoListApp {
+    text: string;
+    items: TodoList;
+    filter: DisplayMode;
+  }
+
+  type TodoList = TodoItem[];
+
+  export interface TodoItem {
+    title: string;
+    completed: boolean;
+    editMode?: boolean;
+  }
+
 }
 
-type TodoList = TodoItem[];
-
-export interface TodoItem {
-  title: string;
-  completed: boolean;
-  editMode?: boolean;
-}
-
-export type State = TodoListApp;
+export type State = State.TodoListApp;
 
 export const initial: State = {
   items: [

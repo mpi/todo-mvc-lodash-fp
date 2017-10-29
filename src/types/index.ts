@@ -31,7 +31,7 @@ export function reducerFor<S, A extends ActionType<string>>(reducers: Reducers<S
 
 interface Ref<T> {
   (ref: T | null): T;
-  ref: T;
+  ref?: T;
 }
 
 export function refTo<T extends HTMLElement>(typeOf: { prototype: T }) {

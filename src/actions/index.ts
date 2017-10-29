@@ -28,23 +28,23 @@ export function switchFilter(filter: 'ALL' | 'COMPLETED' | 'ACTIVE'): SwitchFilt
   return { filter, ...type('SWITCH_FILTER') };
 }
 
-export const ToggleItemAction = returnOf(toggleItem);
-export type ToggleItemAction = typeof ToggleItemAction;
+const ToggleItemActionRet = returnOf(toggleItem);
+export type ToggleItemAction = typeof ToggleItemActionRet;
 
-export const AddItemAction = returnOf(addItem);
-export type AddItemAction = typeof AddItemAction;
+const AddItemActionRet = returnOf(addItem);
+export type AddItemAction = typeof AddItemActionRet;
 
-export const ChangeTextAction = returnOf(changeText);
-export type ChangeTextAction = typeof ChangeTextAction;
+const ChangeTextActionRet = returnOf(changeText);
+export type ChangeTextAction = typeof ChangeTextActionRet;
 
-export const ChangeTitleAction = returnOf(changeTitle);
-export type ChangeTitleAction = typeof ChangeTitleAction;
+const ChangeTitleActionRet = returnOf(changeTitle);
+export type ChangeTitleAction = typeof ChangeTitleActionRet;
 
-export const ClearCompletedAction = returnOf(clearCompleted);
-export type ClearCompletedAction = typeof ClearCompletedAction;
+const ClearCompletedActionRet = returnOf(clearCompleted);
+export type ClearCompletedAction = typeof ClearCompletedActionRet;
 
-export const ToggleEditModeAction = returnOf(toggleEditMode);
-export type ToggleEditModeAction = typeof ToggleEditModeAction;
+const ToggleEditModeActionRet = returnOf(toggleEditMode);
+export type ToggleEditModeAction = typeof ToggleEditModeActionRet;
 
 // export const SwitchFilterAction = returnOf(switchFilter);
 // export type SwitchFilterAction = typeof SwitchFilterAction;

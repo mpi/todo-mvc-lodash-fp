@@ -42,7 +42,7 @@ interface Transform<S> {
 }
 
 export interface Patch<S> extends Function {
-  (state: Partial<S>): S;
+  (state: S): S;
 }
 
 type Diff<S> = {
@@ -54,8 +54,9 @@ export function patch<S, T extends S>(changes: Diff<S>): Patch<T> { return _.mer
 // utils
 
 export const nothing = _.identity;
-export function forAll<T, U extends T>(fn: (t: T) => U): (list: T[]) => U[] { return _.map<T, U>(fn); }
+export const noop = _.identity;
+export const forAll = _.map;
 export const removeIf = _.reject;
 export const append = _.concat;
-export const negate = _.negate((v: boolean) => v);
+export const negate = _.negate(_.identity);
 export const matches = _.isMatchWith(customizer);
