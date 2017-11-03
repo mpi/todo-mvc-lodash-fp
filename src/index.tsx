@@ -6,7 +6,7 @@ import 'todomvc-app-css/index.css';
 import { Provider } from 'react-redux';
 import { createStore } from 'redux';
 
-import App from './components/App/App';
+import App from './containers/App';
 import app from './reducers';
 
 const store = createStore(app);

@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
 import * as React from 'react';
-import { connect } from 'react-redux';
 
 import { refTo } from '../../types';
 
@@ -9,9 +8,27 @@ import { State } from '../../state';
 
 type Actions = typeof all;
 
-function TodoList({text, items, filter, ...actions}: State & Actions) {
+function TodoList(props: State & Actions) {
 
-  let { addItem, changeText, switchFilter, clearCompleted } = actions;
+  return (
+    <div>
+      <section className="todoapp">
+        <Header {...props}/>
+        <List {...props}>
+          {item => <TodoItem {...item} {...props} />}
+        </List>
+        <Footer {...props}/>
+      </section>
+      <footer className="info">
+        <p>Double-click to edit a todo</p>
+        <p>Written by <a href="https://github.com/tastejs/todomvc">TasteJS</a></p>
+        <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+      </footer>
+    </div>
+  );
+}
+
+function Header({ text, addItem, changeText }: State & Actions) {
 
   let input = refTo(HTMLInputElement);
 
@@ -21,55 +38,59 @@ function TodoList({text, items, filter, ...actions}: State & Actions) {
     }
   };
 
+  return (
+    <header className="header">
+      <h1>todos</h1>
+      <input
+        ref={input}
+        type="text"
+        value={text}
+        className="new-todo"
+        onChange={() => changeText(input.ref!.value)}
+        onKeyPress={addOnEnter}
+        placeholder="What needs to be done?"
+      />
+    </header>
+  );
+}
+
+function Footer({items, filter, clearCompleted, switchFilter}: State & Actions) {
+
   const countCompleted = () => _.sumBy(items, x => x.completed ? 0 : 1);
   const isFilteredBy = (value: string) => filter === value ? 'selected' : '';
+
+  return (
+    <footer className="footer">
+      <span className="todo-count"><strong>{countCompleted()}</strong> items left</span>
+      <ul className="filters">
+        <li><a className={isFilteredBy('ALL')} onClick={() => switchFilter('ALL')}>All</a></li>
+        <li><a className={isFilteredBy('ACTIVE')} onClick={() => switchFilter('ACTIVE')}>Active</a></li>
+        <li><a className={isFilteredBy('COMPLETED')} onClick={() => switchFilter('COMPLETED')}>Completed</a></li>
+      </ul>
+      <button className="clear-completed" onClick={clearCompleted}>Clear completed</button>
+    </footer>
+  );
+}
+
+interface Children<I> {
+  children: (item: I) => JSX.Element;
+}
+
+function List({ items, filter, children }: State & Actions & Children<State.TodoItem>) {
+
   const filterBy = ({ completed }: State.TodoItem) =>
     filter === 'COMPLETED' ? completed :
       filter === 'ACTIVE' ? !completed :
         true;
 
   return (
-    <div>
-      <section className="todoapp">
-        <header className="header">
-          <h1>todos</h1>
-          <input
-            ref={input}
-            type="text"
-
-            className="new-todo"
-            onChange={() => changeText(input.ref!.value)}
-            onKeyPress={addOnEnter}
-            placeholder="What needs to be done?"
-          />
-        </header>
-        <section className="main">
-          <input className="toggle-all" type="checkbox" />
-          <label>Mark all as complete</label>
-          <ul className="todo-list">
-            {items.filter(filterBy).map(
-              (item, i) =>
-                <TodoItem key={i} {...item} {...actions} />
-            )
-            }
-          </ul>
-        </section>
-        <footer className="footer">
-          <span className="todo-count"><strong>{countCompleted()}</strong> items left</span>
-          <ul className="filters">
-            <li><a className={isFilteredBy('ALL')} onClick={() => switchFilter('ALL')}>All</a></li>
-            <li><a className={isFilteredBy('ACTIVE')} onClick={() => switchFilter('ACTIVE')}>Active</a></li>
-            <li><a className={isFilteredBy('COMPLETED')} onClick={() => switchFilter('COMPLETED')}>Completed</a></li>
-          </ul>
-          <button className="clear-completed" onClick={clearCompleted}>Clear completed</button>
-        </footer>
-      </section>
-      <footer className="info">
-        <p>Double-click to edit a todo</p>
-        <p>Written by <a href="https://github.com/tastejs/todomvc">TasteJS</a></p>
-        <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
-      </footer>
-    </div>
+    <section className="main">
+      <input className="toggle-all" type="checkbox" />
+      <label>Mark all as complete</label>
+      <ul className="todo-list">
+        {items.filter(filterBy).map(children)}
+      </ul>
+    </section>
   );
 }
 
@@ -100,5 +121,4 @@ function TodoItem({ title, completed, editMode, toggleEditMode, toggleItem, chan
   }
 }
 
-const connector = connect<State & Actions>(_.identity, all);
-export default connector(TodoList);
+export default TodoList;
