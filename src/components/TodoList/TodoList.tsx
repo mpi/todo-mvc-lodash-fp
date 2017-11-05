@@ -1,23 +1,44 @@
 import * as _ from 'lodash';
 import * as React from 'react';
-
 import { refTo } from '../../types';
-
-import * as all from '../../actions';
 import { State } from '../../state';
 
-type Actions = typeof all;
+interface TodoListProps extends HeaderProps, ListProps, FooterProps {
 
-function TodoList(props: State & Actions) {
+  onItemToggle: (title: string) => void;
+  onEditModeToggle: (title: string) => void;
+  onTitleChanged: (title: string, newTitle: string) => void;
+}
+
+function TodoList(props: TodoListProps) {
 
   return (
     <div>
       <section className="todoapp">
-        <Header {...props}/>
-        <List {...props}>
-          {item => <TodoItem {...item} {...props} />}
+        <Header
+          onItemAdded={props.onItemAdded}
+        />
+        <List
+          items={props.items}
+          filter={props.filter}
+        >
+          {item =>
+            <TodoItem
+              title={item.title}
+              completed={item.completed}
+              editMode={item.editMode}
+              onItemToggle={() => props.onItemToggle(item.title)}
+              onEditModeToggle={() => props.onEditModeToggle(item.title)}
+              onTitleChanged={(newTitle) => props.onTitleChanged(item.title, newTitle)}
+            />
+          }
         </List>
-        <Footer {...props}/>
+        <Footer
+          items={props.items}
+          filter={props.filter}
+          onClearCompleted={props.onClearCompleted}
+          onFilterSwitch={props.onFilterSwitch}
+        />
       </section>
       <footer className="info">
         <p>Double-click to edit a todo</p>
@@ -28,13 +49,18 @@ function TodoList(props: State & Actions) {
   );
 }
 
-function Header({ text, addItem, changeText }: State & Actions) {
+interface HeaderProps {
+  onItemAdded: (title: string) => void;
+}
+
+function Header({ onItemAdded }: HeaderProps) {
 
   let input = refTo(HTMLInputElement);
 
   const addOnEnter = (ev: React.KeyboardEvent<HTMLInputElement>) => {
     if (ev.key === 'Enter') {
-      addItem(input.ref!.value);
+      onItemAdded(input.ref!.value);
+      input.ref!.value = '';
     }
   };
 
@@ -44,9 +70,7 @@ function Header({ text, addItem, changeText }: State & Actions) {
       <input
         ref={input}
         type="text"
-        value={text}
         className="new-todo"
-        onChange={() => changeText(input.ref!.value)}
         onKeyPress={addOnEnter}
         placeholder="What needs to be done?"
       />
@@ -54,7 +78,14 @@ function Header({ text, addItem, changeText }: State & Actions) {
   );
 }
 
-function Footer({items, filter, clearCompleted, switchFilter}: State & Actions) {
+interface FooterProps {
+  items: State.TodoItem[];
+  filter: string;
+  onClearCompleted: () => void;
+  onFilterSwitch: (filter: 'ALL' | 'ACTIVE' | 'COMPLETED') => void;
+}
+
+function Footer({items, filter, onClearCompleted, onFilterSwitch}: FooterProps) {
 
   const countCompleted = () => _.sumBy(items, x => x.completed ? 0 : 1);
   const isFilteredBy = (value: string) => filter === value ? 'selected' : '';
@@ -63,11 +94,11 @@ function Footer({items, filter, clearCompleted, switchFilter}: State & Actions) 
     <footer className="footer">
       <span className="todo-count"><strong>{countCompleted()}</strong> items left</span>
       <ul className="filters">
-        <li><a className={isFilteredBy('ALL')} onClick={() => switchFilter('ALL')}>All</a></li>
-        <li><a className={isFilteredBy('ACTIVE')} onClick={() => switchFilter('ACTIVE')}>Active</a></li>
-        <li><a className={isFilteredBy('COMPLETED')} onClick={() => switchFilter('COMPLETED')}>Completed</a></li>
+        <li><a className={isFilteredBy('ALL')} onClick={() => onFilterSwitch('ALL')}>All</a></li>
+        <li><a className={isFilteredBy('ACTIVE')} onClick={() => onFilterSwitch('ACTIVE')}>Active</a></li>
+        <li><a className={isFilteredBy('COMPLETED')} onClick={() => onFilterSwitch('COMPLETED')}>Completed</a></li>
       </ul>
-      <button className="clear-completed" onClick={clearCompleted}>Clear completed</button>
+      <button className="clear-completed" onClick={onClearCompleted}>Clear completed</button>
     </footer>
   );
 }
@@ -76,7 +107,12 @@ interface Children<I> {
   children: (item: I) => JSX.Element;
 }
 
-function List({ items, filter, children }: State & Actions & Children<State.TodoItem>) {
+interface ListProps {
+  items: State.TodoItem[];
+  filter: string;
+}
+
+function List({ items, filter, children }: ListProps & Children<State.TodoItem>) {
 
   const filterBy = ({ completed }: State.TodoItem) =>
     filter === 'COMPLETED' ? completed :
@@ -94,19 +130,25 @@ function List({ items, filter, children }: State & Actions & Children<State.Todo
   );
 }
 
-function TodoItem({ title, completed, editMode, toggleEditMode, toggleItem, changeTitle}: State.TodoItem & Actions) {
+interface TodoItemProps {
+  title: string;
+  completed: boolean;
+  editMode?: boolean;
+  onItemToggle: () => void;
+  onEditModeToggle: () => void;
+  onTitleChanged: (newValue: string) => void;
+}
 
-  const onCheckboxChange = () => toggleItem(title);
-  const onItemDoubleClick = () => toggleEditMode(title);
-  const onBlur = () => toggleEditMode(title);
-  const onInputChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => changeTitle(target.value, title);
+function TodoItem({ title, completed, editMode, onItemToggle, onEditModeToggle, onTitleChanged}: TodoItemProps) {
+
+  const onInputChange = ({ target }: React.ChangeEvent<HTMLInputElement>) => onTitleChanged(target.value);
 
   return editMode ? edit() : preview();
 
   function preview() {
     return (
-      <li className={completed ? 'completed' : 'todo'} onDoubleClick={onItemDoubleClick}>
-        <input onChange={onCheckboxChange} checked={completed} className="toggle" type="checkbox" />
+      <li className={completed ? 'completed' : 'todo'} onDoubleClick={onEditModeToggle}>
+        <input onChange={onItemToggle} checked={completed} className="toggle" type="checkbox" />
         <label>{title}</label>
       </li>
     );
@@ -114,8 +156,15 @@ function TodoItem({ title, completed, editMode, toggleEditMode, toggleItem, chan
 
   function edit() {
     return (
-      <li className="editing" onDoubleClick={onItemDoubleClick}>
-        <input onChange={onInputChange} autoFocus={true} onBlur={onBlur} className="edit" type="text" value={title} />
+      <li className="editing">
+        <input
+          onChange={onInputChange}
+          autoFocus={true}
+          onBlur={onEditModeToggle}
+          className="edit"
+          type="text"
+          value={title}
+        />
       </li>
     );
   }
